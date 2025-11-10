@@ -165,7 +165,7 @@ void OBSBasic::ReplayBufferSaved()
 	proc_handler_call(ph, "get_last_replay", &cd);
 	std::string path = calldata_string(&cd, "path");
 	QString msg = QTStr("Basic.StatusBar.ReplayBufferSavedTo").arg(QT_UTF8(path.c_str()));
-	ShowStatusBarMessage(msg);
+	ShowStatusBarMessageWithFilePath(msg, QT_UTF8(path.c_str()));
 	lastReplay = path;
 	calldata_free(&cd);
 
