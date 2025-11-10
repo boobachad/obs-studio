@@ -1356,6 +1356,7 @@ private:
 public:
 	inline double GetCPUUsage() const { return os_cpu_usage_info_query(cpuUsageInfo); }
 	void ShowStatusBarMessage(const QString &message);
+	void ShowStatusBarMessageWithFilePath(const QString &message, const QString &filePath);
 
 	/* -------------------------------------
 	 * MARK: - OBSBasic_Streaming

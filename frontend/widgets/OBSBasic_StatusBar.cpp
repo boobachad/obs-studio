@@ -24,3 +24,9 @@ void OBSBasic::ShowStatusBarMessage(const QString &message)
 	ui->statusbar->clearMessage();
 	ui->statusbar->showMessage(message, 10000);
 }
+
+void OBSBasic::ShowStatusBarMessageWithFilePath(const QString &message, const QString &filePath)
+{
+	ui->statusbar->clearMessage();
+	ui->statusbar->showMessageWithFilePath(message, filePath, 10000);
+}

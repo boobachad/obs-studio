@@ -63,6 +63,8 @@ private:
 	QPointer<QTimer> refreshTimer;
 	QPointer<QTimer> messageTimer;
 
+	QString clickableFilePath;
+
 	obs_output_t *GetOutput();
 
 	void Activate();
@@ -75,6 +77,8 @@ private:
 	void UpdateRecordTimeLabel();
 	void UpdateDroppedFrames();
 
+	bool eventFilter(QObject *obj, QEvent *event) override;
+
 	static void OBSOutputReconnect(void *data, calldata_t *params);
 	static void OBSOutputReconnectSuccess(void *data, calldata_t *params);
 
@@ -83,6 +87,7 @@ public slots:
 
 	void clearMessage();
 	void showMessage(const QString &message, int timeout = 0);
+	void showMessageWithFilePath(const QString &message, const QString &filePath, int timeout = 0);
 
 private slots:
 	void Reconnect(int seconds);

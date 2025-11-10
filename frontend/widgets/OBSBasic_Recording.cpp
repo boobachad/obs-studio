@@ -219,7 +219,7 @@ void OBSBasic::RecordingStop(int code, QString last_error)
 		if (outputHandler) {
 			std::string path = outputHandler->lastRecordingPath;
 			QString str = QTStr("Basic.StatusBar.RecordingSavedTo");
-			ShowStatusBarMessage(str.arg(QT_UTF8(path.c_str())));
+			ShowStatusBarMessageWithFilePath(str.arg(QT_UTF8(path.c_str())), QT_UTF8(path.c_str()));
 		}
 	}
 
@@ -236,7 +236,7 @@ void OBSBasic::RecordingStop(int code, QString last_error)
 void OBSBasic::RecordingFileChanged(QString lastRecordingPath)
 {
 	QString str = QTStr("Basic.StatusBar.RecordingSavedTo");
-	ShowStatusBarMessage(str.arg(lastRecordingPath));
+	ShowStatusBarMessageWithFilePath(str.arg(lastRecordingPath), lastRecordingPath);
 
 	AutoRemux(lastRecordingPath, true);
 }
