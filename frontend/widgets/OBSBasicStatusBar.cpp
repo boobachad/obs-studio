@@ -3,6 +3,11 @@
 
 #include <widgets/OBSBasic.hpp>
 
+#include <QDesktopServices>
+#include <QFileInfo>
+#include <QMouseEvent>
+#include <QUrl>
+
 #include "moc_OBSBasicStatusBar.cpp"
 
 static constexpr int bitrateUpdateSeconds = 2;
@@ -45,6 +50,9 @@ OBSBasicStatusBar::OBSBasicStatusBar(QWidget *parent)
 	messageTimer = new QTimer(this);
 	messageTimer->setSingleShot(true);
 	connect(messageTimer, &QTimer::timeout, this, &OBSBasicStatusBar::clearMessage);
+
+	// Install event filter on the message label to handle clicks
+	statusWidget->ui->message->installEventFilter(this);
 
 	clearMessage();
 }
@@ -578,7 +586,23 @@ void OBSBasicStatusBar::showMessage(const QString &message, int timeout)
 {
 	messageTimer->stop();
 
+	clickableFilePath.clear();
 	statusWidget->ui->message->setText(message);
+	statusWidget->ui->message->setCursor(Qt::ArrowCursor);
+	statusWidget->ui->message->setStyleSheet("");
+
+	if (timeout)
+		messageTimer->start(timeout);
+}
+
+void OBSBasicStatusBar::showMessageWithFilePath(const QString &message, const QString &filePath, int timeout)
+{
+	messageTimer->stop();
+
+	clickableFilePath = filePath;
+	statusWidget->ui->message->setText(message);
+	statusWidget->ui->message->setCursor(Qt::PointingHandCursor);
+	statusWidget->ui->message->setStyleSheet("QLabel { color: palette(link); text-decoration: underline; }");
 
 	if (timeout)
 		messageTimer->start(timeout);
@@ -586,5 +610,35 @@ void OBSBasicStatusBar::showMessage(const QString &message, int timeout)
 
 void OBSBasicStatusBar::clearMessage()
 {
+	clickableFilePath.clear();
 	statusWidget->ui->message->setText("");
+	statusWidget->ui->message->setCursor(Qt::ArrowCursor);
+	statusWidget->ui->message->setStyleSheet("");
+}
+
+bool OBSBasicStatusBar::eventFilter(QObject *obj, QEvent *event)
+{
+	if (obj == statusWidget->ui->message) {
+		if (event->type() == QEvent::MouseButtonPress) {
+			QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+			if (mouseEvent->button() == Qt::LeftButton && !clickableFilePath.isEmpty()) {
+				QFileInfo fileInfo(clickableFilePath);
+				if (fileInfo.exists()) {
+					// Open the folder containing the file
+					QString folderPath = fileInfo.absolutePath();
+					QDesktopServices::openUrl(QUrl::fromLocalFile(folderPath));
+					return true;
+				}
+			}
+		} else if (event->type() == QEvent::Enter && !clickableFilePath.isEmpty()) {
+			statusWidget->ui->message->setCursor(Qt::PointingHandCursor);
+		} else if (event->type() == QEvent::Leave) {
+			if (!clickableFilePath.isEmpty()) {
+				statusWidget->ui->message->setCursor(Qt::PointingHandCursor);
+			} else {
+				statusWidget->ui->message->setCursor(Qt::ArrowCursor);
+			}
+		}
+	}
+	return QStatusBar::eventFilter(obj, event);
 }
